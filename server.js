@@ -16,7 +16,7 @@ app.use(cors());
 // Api routes
 app.get('/location', (request, response) => {
     try {
-        const location = request.query.location;
+        const location = request.query.search;
         const result = getLatLng(location);
         response.status(200).json(result);
     }
