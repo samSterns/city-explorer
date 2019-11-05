@@ -21,7 +21,7 @@ app.get('/location', (request, response) => {
         response.status(200).json(result);
     }
     catch (err) {
-        response.status(500).send('Sorry something went wrong, please try again');
+        response.status(500).send('Sorry, something went wrong. Please try again');    
     }
 });
 
@@ -32,8 +32,7 @@ app.get('/weather', (request, response) => {
         response.status(200).json(result);
     }
     catch (err) {
-        console.log(err);
-        response.status(500).send('Sorry, something went wrong. Please try again');
+        response.status(500).send('Sorry, something went wrong. Please try again');   
     }
 });
 
