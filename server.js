@@ -25,7 +25,20 @@ app.get('/location', (request, response) => {
     }
 });
 
+app.get('/weather', (request, response) => {
+    try {
+        const weather = request.query.weather;
+        const result = formatWeather(weather);
+        response.status(200).json(result);
+    }
+    catch (err) {
+        console.log(err);
+        response.status(500).send('Sorry, something went wrong. Please try again');
+    }
+});
+
 const geoData = require('./data/geo.json');
+const weatherData = require('./data/darksky.json');
 
 function getLatLng(location) {
     if (location === 'bad location') {
@@ -45,6 +58,17 @@ function toLocation(geoData) {
     };
 }
 
+function formatWeather() {
+    let dayArray = [];
+    weatherData.daily.data.forEach(day => {
+        dayArray.push({ 
+            forecast: day.summary,
+            time: new Date(day.time),
+        });
+    });
+    return dayArray;
+}
+formatWeather(weatherData);
 
 // Start the server
 app.listen(PORT, () => {
