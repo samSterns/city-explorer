@@ -1,5 +1,6 @@
 // Load Environment Variables from the .env file
 require('dotenv').config();
+const superagent = require('superagent');
 
 // Application Dependencies
 const express = require('express');
@@ -12,6 +13,8 @@ const app = express();
 const PORT = process.env.PORT;
 // - enable CORS
 app.use(cors());
+
+let latlngs;
 
 // Api routes
 app.get('/location', (request, response) => {
@@ -51,25 +54,25 @@ function toLocation(geoData) {
     const geometry = firstResult.geometry;
 
     return {
-        formatted_query: firstResult.formatted_query,
+        formatted_query: firstResult.formatted_address,
         latitude: geometry.location.lat,
         longitude: geometry.location.lng
     };
 }
 
 function formatWeather() {
-    let dayArray = [];
-    weatherData.daily.data.forEach(day => {
-        dayArray.push({ 
+    return weatherData.daily.data.map(day => {
+        return {
             forecast: day.summary,
-            time: new Date(day.time),
-        });
+            time: new Date(day.time * 1000).toDateString()
+        };
     });
-    return dayArray;
 }
+console.log(weatherData.daily.data);
 formatWeather(weatherData);
 
 // Start the server
 app.listen(PORT, () => {
     console.log('server running on PORT', PORT);
 });
+
