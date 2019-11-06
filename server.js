@@ -15,7 +15,8 @@ const PORT = process.env.PORT;
 app.use(cors());
 
 
-
+// eslint-disable-next-line no-unused-vars
+let latlngs;
 
 // Api routes
 app.get('/location', async(request, response) => {
