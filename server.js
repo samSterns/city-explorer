@@ -47,6 +47,26 @@ app.get('/weather', async(latlngs, res) => {
     }
 });
 
+// app.get('/events', async(latlngs, res) => {
+//     try {
+//         const eventObject = await getEventResponse(latlngs.query.latitude, latlngs.query.longitude);
+//         res.status(200).json(eventObject);
+//     }
+//     catch (err) {
+//         res.status(500).send('Sorry, something went wrong. Please try again');   
+//     }
+// });
+
+app.get('/trails', async(latlngs, res) => {
+    try {
+        const trailsObject = await getTrailsResponse(latlngs.query.latitude, latlngs.query.longitude);
+        res.status(200).json(trailsObject);
+    }
+    catch (err) {
+        res.status(500).send('Sorry, something went wrong. Please try again');   
+    }
+});
+
 
 function toLocation(locationItem) {
 
@@ -71,6 +91,41 @@ const getWeatherResponse = async(lat, lng) => {
         };
     });
 };
+
+
+
+const getTrailsResponse = async(lat, lng) => {
+    const trailData = await superagent.get(`https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lng}&maxDistance=200&key=${process.env.TRAIL_API_KEY}`);
+    const parsedTrailData = JSON.parse(trailData.text);
+    return parsedTrailData.trails.map(trail => {
+        return {
+            name: trail.name,
+            location: trail.location,
+            length: trail.length,
+            stars: trail.stars,
+            stars_votes: trail.starVotes,
+            summary: trail.summary,
+            trail_url: trail.url,
+            conditions: trail.conditionStatus,
+            condition_date: trail.conditionDate,
+        };
+    });
+};
+
+// `https://www.eventbriteapi.com/v3/events/search?location.latitude=45&location.longitude=122token=XOAVNIEIS46YDPNZL6`
+
+// https://www.eventbriteapi.com/v3/events/search?token=BKI2EPP5P2KJAKC2TMZN&location.latitude=45&location.longitude=$122
+
+// const getEventResponse = async(lat, lng) => {
+//     const eventData = await superagent.get(`https://www.eventbriteapi.com/v3/events/search?token=${api-key}&location.latitude=${lat}&location.longitude=${lng}`);
+//     const parsedEventData = JSON.parse(eventData.text);
+//     return parsedEventData.daily.data.map(event => {
+//         return {
+//             forecast: event.summary,
+//             time: new Date(event.time * 1000).toDateString()
+//         };
+//     });
+// };
 
 // Start the server
 app.listen(PORT, () => {
