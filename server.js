@@ -14,7 +14,7 @@ const PORT = process.env.PORT;
 // - enable CORS
 app.use(cors());
 
-// let latlngs;
+let latlngs;
 
 // Api routes
 app.get('/location', async(request, response) => {
@@ -25,10 +25,10 @@ app.get('/location', async(request, response) => {
         const locationItem = await superagent.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${searchQuery}&key=${GEOCODE_API_KEY}`);
         
         const parsedLocation = JSON.parse(locationItem.text).results[0];
-       console.log(parsedLocation)
+       
         const formattedSearchResult = toLocation(parsedLocation);
-        console.log(formattedSearchResult);
-
+        latlngs = formattedSearchResult;
+        
         response.status(200).json(formattedSearchResult);
     }
     catch (err) {
@@ -36,16 +36,16 @@ app.get('/location', async(request, response) => {
     }
 });
 
-// app.get('/weather', (request, response) => {
-//     try {
-//         const weather = request.query.weather;
-//         const result = formatWeather(weather);
-//         response.status(200).json(result);
-//     }
-//     catch (err) {
-//         response.status(500).send('Sorry, something went wrong. Please try again');   
-//     }
-// });
+app.get('/weather', async(latlngs, res) => {
+    try {
+        console.log(latlngs.query.latitude, 'latlong');
+        const weatherObject = await getWeatherResponse(latlngs.query.latitude, latlngs.query.longitude);
+        res.status(200).json(weatherObject);
+    }
+    catch (err) {
+        res.status(500).send('Sorry, something went wrong. Please try again');   
+    }
+});
 
 
 function toLocation(locationItem) {
@@ -59,15 +59,18 @@ function toLocation(locationItem) {
     };
 }
 
-// function formatWeather() {
-//     return weatherData.daily.data.map(day => {
-//         return {
-//             forecast: day.summary,
-//             time: new Date(day.time * 1000).toDateString()
-//         };
-//     });
-// }
-// formatWeather(weatherData);
+
+
+const getWeatherResponse = async(lat, lng) => {
+    const weatherData = await superagent.get(`https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${lat},${lng}`);
+    const parsedWeatherData = JSON.parse(weatherData.text);
+    return parsedWeatherData.daily.data.map(day => {
+        return {
+            forecast: day.summary,
+            time: new Date(day.time * 1000).toDateString()
+        };
+    });
+};
 
 // Start the server
 app.listen(PORT, () => {
