@@ -107,14 +107,13 @@ const getYelpResponse = async(lat, lng) => {
     const yelpData = await superagent.get(`https://api.yelp.com/v3/businesses/search?latitude=${lat}&longitude=${lng}`).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`);
     
     const parsedYelpData = JSON.parse(yelpData.text);
-    console.log(parsedYelpData)
-    return parsedYelpData.map(review => {
+    return parsedYelpData.businesses.map(review => {
         return {
-            name: review.businesses.name,
-            image_url: review.businesses.image_url,
-            price: review.businesses.price,
-            rating: review.businesses.rating,
-            url: review.businesses.url
+            name: review.name,
+            image_url: review.image_url,
+            price: review.price,
+            rating: review.rating,
+            url: review.url
         };
     });
 };
