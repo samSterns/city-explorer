@@ -14,6 +14,7 @@ const PORT = process.env.PORT;
 // - enable CORS
 app.use(cors());
 
+
 let latlngs;
 
 // Api routes
@@ -38,7 +39,6 @@ app.get('/location', async(request, response) => {
 
 app.get('/weather', async(latlngs, res) => {
     try {
-        console.log(latlngs.query.latitude, 'latlong');
         const weatherObject = await getWeatherResponse(latlngs.query.latitude, latlngs.query.longitude);
         res.status(200).json(weatherObject);
     }
@@ -56,6 +56,16 @@ app.get('/weather', async(latlngs, res) => {
 //         res.status(500).send('Sorry, something went wrong. Please try again');   
 //     }
 // });
+
+app.get('/reviews', async(latlngs, res) => {
+    try {
+        const yelpObject = await getYelpResponse(latlngs.query.latitude, latlngs.query.longitude);
+        res.status(200).json(yelpObject);
+    }
+    catch (err) {
+        res.status(500).send('Sorry, something went wrong. Please try again');   
+    }
+});
 
 app.get('/trails', async(latlngs, res) => {
     try {
@@ -93,6 +103,21 @@ const getWeatherResponse = async(lat, lng) => {
 };
 
 
+const getYelpResponse = async(lat, lng) => {
+    const yelpData = await superagent.get(`https://api.yelp.com/v3/businesses/search?latitude=${lat}&longitude=${lng}`).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`);
+    
+    const parsedYelpData = JSON.parse(yelpData.text);
+    console.log(parsedYelpData)
+    return parsedYelpData.map(review => {
+        return {
+            name: review.businesses.name,
+            image_url: review.businesses.image_url,
+            price: review.businesses.price,
+            rating: review.businesses.rating,
+            url: review.businesses.url
+        };
+    });
+};
 
 const getTrailsResponse = async(lat, lng) => {
     const trailData = await superagent.get(`https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lng}&maxDistance=200&key=${process.env.TRAIL_API_KEY}`);
