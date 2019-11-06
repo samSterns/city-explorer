@@ -15,7 +15,7 @@ const PORT = process.env.PORT;
 app.use(cors());
 
 
-let latlngs;
+
 
 // Api routes
 app.get('/location', async(request, response) => {
